@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.phupd202.auth.dto.SignUpDto;
 import com.phupd202.auth.service.SignUpService;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 @RequestMapping("/library-online")
@@ -50,5 +52,11 @@ public class AuthController {
             logger.error("Error during signup", e);
             return "error";
         }
+    }
+
+    @GetMapping("/signin")
+    public String getMethodName(Model model) {
+        return "sign-in";
+        
     }
 }
