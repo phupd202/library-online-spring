@@ -9,4 +9,5 @@ import com.phupd202.auth.entity.Account;
 public interface AccountRepository extends JpaRepository<Account, Long>{
     // List<Account> findByEmail(String email);
     Account findByEmail(String email);
+
 }

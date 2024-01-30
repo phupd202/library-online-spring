@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<!-- Thymeleaf -->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+</html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <title>Admin | Danh sách tài khoản</title>
+</head>
+
+<body>
+    <section class="vh-100">
+        <div class="container-fuild h-100" style="background-color: #EEEEEE;">
+            <!--Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="#">Library Online</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="#">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Link 1</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Link 2</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Start main -->
+            <main>
+                <div class="row d-flex justify-content-center mt-100">
+                    <div class="col-10">
+                        <!-- Start Table -->
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Id</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Số điện thoại</th>
+                                        <th scope="col">Loại tài khoản</th>
+                                        <th scope="col">Tuỳ chọn</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr th:each="authority : ${authorities}" th:id="row-" +
+                                        ${authority.account.accountId}>
+                                        <td th:text="${authority.accountId}"></td>
+                                        <td th:text="${authority.email}"></td>
+                                        <td th:text="${authority.phone}"></td>
+                                        <td th:text="${authority.nameRole}"></td>
+                                        <td>
+                                            <!-- Delete Button -->
+                                            <a href="#" class="btn btn-danger" data-action="delete"
+                                                data-account-id= "/*[[${authority.account.accountId}]]*/"
+                                                th:if="${not authority.isDeleted}">Xoá</a>
+
+                                            <!-- Recovery Button -->
+                                            <a href="#" class="btn btn-warning" data-action="recovery"
+                                                data-account-id="/*[[${authority.account.accountId}]]*/"
+                                                th:if="${authority.isDeleted}">Khôi phục</a>
+
+                                            <!-- Modify button -->
+                                            <button type="submit" href="#" class="btn btn-primary" data-toggle="modal"
+                                                data-target="#editModal">Sửa</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+                        <!-- End table -->
+                    </div>
+                </div>
+
+
+        </div>
+
+        <!-- Modal for Edit -->
+        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Chỉnh sửa thông tin</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form for editing -->
+                        <form id="editForm">
+                            <label for="email">Email:</label>
+                            <input type="text" id="emailId" name="email" class="form-control"
+                                value="phuctc855@gmail.com" required>
+
+                            <label for="phone">SĐT:</label>
+                            <input type="text" id="phoneId" name="phone" class="form-control" value="0977623081"
+                                required>
+
+                            <label for="accountType">Loại tài khoản:</label>
+                            <input type="text" id="accountTypeId" name="accountType" class="form-control" value="Admin"
+                                required>
+
+                            <button type="button" class="btn btn-primary" onclick="updateUserInfo()">Cập
+                                nhật</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            </main>
+            <!-- End main -->
+        </div>
+    </section>
+    <!-- Add this script at the end of your HTML body -->
+    <!-- Include jQuery -->
+
+    <script th:src="@{https://code.jquery.com/jquery-3.6.4.min.js}"></script>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            var buttonDelete = $('.btn-danger');
+            var buttonRecovery = $('.btn-warning');
+
+            $(buttonDelete).click(function (event) {
+                event.preventDefault();
+                var clickedButton = $(this);
+                var accountId = authoritiesData[clickedButton.index()].accountId; // Use the index of the clicked button
+                var action = clickedButton.data('action');
+
+                var formData = {
+                    'accountId': accountId,
+                    'action': action
+                }
+
+                // Hiển thị xác nhận từ người dùng
+                if (confirm("Bạn có chắc muốn xoá không?")) {
+                    // Thêm token CSRF vào header của yêu cầu
+                    var tokenCsrf = $("meta[name='_csrf']").attr("content");
+                    var headerCsrf = $("meta[name='_csrf_header']").attr("content");
+                    $.ajax({
+                        type: 'POST',
+                        url: '/library-online/admin/list-user',
+                        data: formData,
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader(headerCsrf, tokenCsrf);
+                        },
+
+                        success: function () {
+                            console.log('Thành công');
+                            clickedButton.removeClass('btn-danger').addClass('btn-warning').text('Xác nhận');
+                            console.log(JSON.stringify(formData));
+                        },
+                        error: function () {
+                            alert('Không thành công, vui lòng kiểm tra lại!!');
+                            console.log(JSON.stringify(formData));
+                        }
+                    });
+                }
+            });
+
+            $(buttonRecovery).click(function (event) {
+                event.preventDefault();
+                var clickedButton = $(this);
+                var accountId = authoritiesData[clickedButton.index()].accountId; // Use the index of the clicked button
+                var action = clickedButton.data('action');
+
+                var formData = {
+                    'accountId': accountId,
+                    'action': action
+                }
+
+                // Hiển thị xác nhận từ người dùng
+                if (confirm("Bạn có chắc muốn khôi phục không?")) {
+                    // Thêm token CSRF vào header của yêu cầu
+                    var tokenCsrf = $("meta[name='_csrf']").attr("content");
+                    var headerCsrf = $("meta[name='_csrf_header']").attr("content");
+                    $.ajax({
+                        type: 'POST',
+                        url: '/library-online/admin/list-user',
+                        data: formData,
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader(headerCsrf, tokenCsrf);
+                        },
+
+                        success: function () {
+                            console.log('Thành công');
+                            clickedButton.removeClass('btn-warning').addClass('btn-danger').text('Xoá');
+                            console.log(JSON.stringify(formData));
+                        },
+                        error: function () {
+                            alert('Không thành công, vui lòng kiểm tra lại!!');
+                            console.log(JSON.stringify(formData));
+                        }
+                    });
+                }
+            });
+        });
+
+
+    </script>
+
+    <!-- Include Popper.js -->
+    <script th:src="@{https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js}"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+
+    <!-- Include Bootstrap JavaScript -->
+    <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js}"
+        integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+"
+        crossorigin="anonymous"></script>
+    <script th:src="@{/js/adminGetAccount.js}"></script>
+
+</body>
+
+</html>

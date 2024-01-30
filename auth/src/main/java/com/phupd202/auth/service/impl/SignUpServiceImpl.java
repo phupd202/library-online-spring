@@ -71,6 +71,7 @@ public class SignUpServiceImpl implements SignUpService {
         savedAccount.setPhone(signupDto.getPhone());
         savedAccount.setPassword(passwordEncoder.encode(signupDto.getPassword()));
         savedAccount.setIsActive(false);
+        savedAccount.setIsDeleted(false);
 
         // SAVE DATA
         try {
