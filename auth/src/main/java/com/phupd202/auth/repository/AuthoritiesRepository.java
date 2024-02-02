@@ -14,4 +14,7 @@ public interface AuthoritiesRepository extends JpaRepository<Authorities, Long> 
 
     @Query("SELECT au FROM Authorities au JOIN au.account ac WHERE ac.accountId = :accountId")
     Authorities findByAccountId(@Param("accountId") Long accountId);
+
+    @Query("SELECT au FROM Authorities au JOIN au.account ac WHERE ac.email = :email")
+    Authorities findByAccountEmail(@Param("email") String email);
 }
