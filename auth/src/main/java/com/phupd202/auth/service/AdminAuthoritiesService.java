@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.phupd202.auth.dto.AuthoritiesDto;
 
-public interface AdminGetAccountService {
+public interface AdminAuthoritiesService {
     List<AuthoritiesDto> findAllAccountService();
 
     // deleted Id by account
@@ -12,4 +12,7 @@ public interface AdminGetAccountService {
 
     // recovery account by Id
     Boolean recoveryAccount(Long accountId);
+
+    // edit account
+    Boolean editAccount(String email, String phone, String role);
 }

@@ -54,35 +54,37 @@
                                         <th scope="col">Email</th>
                                         <th scope="col">Số điện thoại</th>
                                         <th scope="col">Loại tài khoản</th>
-                                        <th scope="col">Tuỳ chọn</th>
+                                        <th scope="col">Quản lý tài khoản</th>
+                                        <th scope="col">Thay đổi thông tin</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
                                     <tr th:each="authority : ${authorities}" th:id="row-" +
-                                        ${authority.account.accountId}>
+                                        ${authority.accountId}>
                                         <td th:text="${authority.accountId}"></td>
-                                        <td th:text="${authority.email}"></td>
-                                        <td th:text="${authority.phone}"></td>
+                                        <td th:text="${authority.email}" th:attr="id='email-' + ${authority.accountId}"></td>
+                                        <td th:text="${authority.phone}" th:attr="id='phone-' + ${authority.accountId}"></td>
+
                                         <td th:text="${authority.nameRole}"></td>
                                         <td>
                                             <!-- Delete Button -->
                                             <a href="#" class="btn btn-danger" data-action="delete"
-                                                data-account-id= "/*[[${authority.account.accountId}]]*/"
-                                                th:if="${not authority.isDeleted}">Xoá</a>
+                                                th:id= "${authority.accountId}"
+                                                th:if="${not authority.isDeleted}">Khoá</a>
 
                                             <!-- Recovery Button -->
                                             <a href="#" class="btn btn-warning" data-action="recovery"
-                                                data-account-id="/*[[${authority.account.accountId}]]*/"
+                                                th:id = "${authority.accountId}"
                                                 th:if="${authority.isDeleted}">Khôi phục</a>
-
-                                            <!-- Modify button -->
-                                            <button type="submit" href="#" class="btn btn-primary" data-toggle="modal"
-                                                data-target="#editModal">Sửa</a>
+                                        </td>
+                                        <td>
+                                             <!-- Modify button -->
+                                             <a class="btn btn-primary" data-toggle="modal"
+                                             data-target="#editModal">Sửa</a>
                                         </td>
                                     </tr>
                                 </tbody>
-
                             </table>
                         </div>
                         <!-- End table -->
@@ -104,22 +106,22 @@
                         </button>
                     </div>
                     <div class="modal-body">
+
                         <!-- Form for editing -->
-                        <form id="editForm">
-                            <label for="email">Email:</label>
-                            <input type="text" id="emailId" name="email" class="form-control"
-                                value="phuctc855@gmail.com" required>
-
+                        <form id="edit-form">
                             <label for="phone">SĐT:</label>
-                            <input type="text" id="phoneId" name="phone" class="form-control" value="0977623081"
+                            <input type="text" id="phone-id-form" name="phone" class="form-control" 
                                 required>
-
-                            <label for="accountType">Loại tài khoản:</label>
-                            <input type="text" id="accountTypeId" name="accountType" class="form-control" value="Admin"
-                                required>
-
-                            <button type="button" class="btn btn-primary" onclick="updateUserInfo()">Cập
-                                nhật</button>
+                            <!-- Account Type -->
+                            <label for="role">Loại tài khoản:</label>
+                            <br>
+                            <select name="role" id="role-id-form">
+                                <option th:value="USER">USER</option>
+                                <option th:value="ADMIN">ADMIN</option>
+                            </select>
+                            <br>
+                            <p class = "d-flex justify-content-center"> <button type="button" class="btn btn-primary">Cập
+                                nhật</button></p>
                         </form>
                     </div>
                 </div>
@@ -130,107 +132,17 @@
         </div>
     </section>
     <!-- Add this script at the end of your HTML body -->
-    <!-- Include jQuery -->
 
+    <!-- Script -->
     <script th:src="@{https://code.jquery.com/jquery-3.6.4.min.js}"></script>
-    <script th:inline="javascript">
-        $(document).ready(function () {
-            var buttonDelete = $('.btn-danger');
-            var buttonRecovery = $('.btn-warning');
-
-            $(buttonDelete).click(function (event) {
-                event.preventDefault();
-                var clickedButton = $(this);
-                var accountId = authoritiesData[clickedButton.index()].accountId; // Use the index of the clicked button
-                var action = clickedButton.data('action');
-
-                var formData = {
-                    'accountId': accountId,
-                    'action': action
-                }
-
-                // Hiển thị xác nhận từ người dùng
-                if (confirm("Bạn có chắc muốn xoá không?")) {
-                    // Thêm token CSRF vào header của yêu cầu
-                    var tokenCsrf = $("meta[name='_csrf']").attr("content");
-                    var headerCsrf = $("meta[name='_csrf_header']").attr("content");
-                    $.ajax({
-                        type: 'POST',
-                        url: '/library-online/admin/list-user',
-                        data: formData,
-                        contentType: 'application/json',
-                        dataType: 'json',
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader(headerCsrf, tokenCsrf);
-                        },
-
-                        success: function () {
-                            console.log('Thành công');
-                            clickedButton.removeClass('btn-danger').addClass('btn-warning').text('Xác nhận');
-                            console.log(JSON.stringify(formData));
-                        },
-                        error: function () {
-                            alert('Không thành công, vui lòng kiểm tra lại!!');
-                            console.log(JSON.stringify(formData));
-                        }
-                    });
-                }
-            });
-
-            $(buttonRecovery).click(function (event) {
-                event.preventDefault();
-                var clickedButton = $(this);
-                var accountId = authoritiesData[clickedButton.index()].accountId; // Use the index of the clicked button
-                var action = clickedButton.data('action');
-
-                var formData = {
-                    'accountId': accountId,
-                    'action': action
-                }
-
-                // Hiển thị xác nhận từ người dùng
-                if (confirm("Bạn có chắc muốn khôi phục không?")) {
-                    // Thêm token CSRF vào header của yêu cầu
-                    var tokenCsrf = $("meta[name='_csrf']").attr("content");
-                    var headerCsrf = $("meta[name='_csrf_header']").attr("content");
-                    $.ajax({
-                        type: 'POST',
-                        url: '/library-online/admin/list-user',
-                        data: formData,
-                        contentType: 'application/json',
-                        dataType: 'json',
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader(headerCsrf, tokenCsrf);
-                        },
-
-                        success: function () {
-                            console.log('Thành công');
-                            clickedButton.removeClass('btn-warning').addClass('btn-danger').text('Xoá');
-                            console.log(JSON.stringify(formData));
-                        },
-                        error: function () {
-                            alert('Không thành công, vui lòng kiểm tra lại!!');
-                            console.log(JSON.stringify(formData));
-                        }
-                    });
-                }
-            });
-        });
-
-
-    </script>
-
-    <!-- Include Popper.js -->
     <script th:src="@{https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js}"
         integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
         crossorigin="anonymous"></script>
-
-    <!-- Include Bootstrap JavaScript -->
     <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js}"
         integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+"
         crossorigin="anonymous"></script>
     <script th:src="@{/js/adminGetAccount.js}"></script>
-
+    <script th:src = "@{/js/updateInfoAccount.js}"></script>
 </body>
 
 </html>

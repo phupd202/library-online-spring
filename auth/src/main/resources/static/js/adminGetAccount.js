@@ -5,8 +5,8 @@ $(document).ready(function() {
     $(buttonDelete).click(function(event) {
         event.preventDefault();
         var clickedButton = $(this);
-        var accountId = /*[[${authority.accountId}]]*/ '';
-        var action = clickedButton.data('action');
+        var accountId = clickedButton.attr('id')
+        var action = clickedButton.attr('data-action');
 
         var formData = {
             'accountId': accountId,
@@ -20,22 +20,27 @@ $(document).ready(function() {
             var headerCsrf = $("meta[name='_csrf_header']").attr("content");
             $.ajax({
                 type: 'POST',
-                url: '/library-online/admin/list-user',
-                data: formData,
-                contentType: 'application/json',
-                dataType: 'json',
+                url: '/library-online/admin/user/delete-user',
+                data: JSON.stringify(formData), // dữ liệu mà server nhận được
+                contentType: 'application/json', // loại dữ liệu của yêu cầu
                 beforeSend: function(xhr) {
                     xhr.setRequestHeader(headerCsrf, tokenCsrf);
                 },
                 
                 success: function() {
                     console.log('Thành công');
-                    clickedButton.removeClass('btn-danger').addClass('btn-warning').text('Xác nhận');
+                    clickedButton.removeClass('btn-danger').addClass('btn-warning').text('Khôi phục');
                     console.log(JSON.stringify(formData));
+                    // check phần tử nào được nhấn
+                    console.log(clickedButton);
+
                 },
+
                 error: function() {
                     alert('Không thành công, vui lòng kiểm tra lại!!');
                     console.log(JSON.stringify(formData));
+                    console.log(clickedButton);
+
                 }
             });
         }
@@ -44,7 +49,7 @@ $(document).ready(function() {
     $(buttonRecovery).click(function(event) {
         event.preventDefault();
         var clickedButton = $(this);
-        var accountId = /*[[${authority.accountId}]]*/ '';
+        var accountId = clickedButton.attr('id');
         var action = clickedButton.data('action');
         
         var formData = {
@@ -59,55 +64,27 @@ $(document).ready(function() {
             var headerCsrf = $("meta[name='_csrf_header']").attr("content");
             $.ajax({
                 type: 'POST',
-                url: '/library-online/admin/list-user',
-                data: formData,
+                url: '/library-online/admin/user/recovery-user',
+                data: JSON.stringify(formData), // data gửi cho server(dạng chuỗi JSON)
+                // dataType: 'json', kiểu dữ liệu mong muốn nhận lại tử server --> không cần thiết --> do trong th này server không gửi lại dữ liệu cho client
                 contentType: 'application/json',
-                dataType:'json',
                 beforeSend: function(xhr) {
                     xhr.setRequestHeader(headerCsrf, tokenCsrf);
                 },
-                
                 success: function() {
                     console.log('Thành công');
-                    clickedButton.removeClass('btn-warning').addClass('btn-danger').text('Xoá');
+                    clickedButton.removeClass('btn-warning').addClass('btn-danger').text('Khoá');
                     console.log(JSON.stringify(formData));
+                    console.log(clickedButton);
+
                 },
                 error: function() {
                     alert('Không thành công, vui lòng kiểm tra lại!!');
                     console.log(JSON.stringify(formData));
+                    // check phần tử nào được nhấn
+                    console.log(clickedButton);
                 }
             });
         }
     });
 });
-
-
-// //--> Đoạn mã này gửi dữ liệu bàng JSON, do vậy sử dụng mô hình truyền thống với Thymeleaf có thể sẽ không sử dụng được
-// // --> Có thể sử dụng AJAX thông quan phương thức .get,.post() của JQuery và truyền dữ liệu thông qua param --> dễ dàng bắt với thymleaf
-// // $(document).ready(function() {
-// //     var buttonDelete = $(".btn-danger")
-// //     var buttonRecovery = $(".btn-warning")
-
-// //     $(".btn danger").click(function(event) {
-// //         event.preventDefault();
-// //         var clickedButton = $(this)
-// //         var accountId = clickedButton.data("account-id")
-// //         var action = clickedButton.data("action")
-
-// //         // data
-// //         var formData = {
-// //             param1: accountId,
-// //             param2: action
-// //         }
-
-// //         // send request post
-// //         $.post('/library-online/admin/list-user', formData, function() {
-// //             clickedButton.removeClass('btn-danger').addClass('btn-warning').text('Xác nhận');
-// //             console.log("Thành công");
-// //             alert("Thành công")
-// //         })
-// //         .fail(function() {
-// //             alert("Không thành công")
-// //         })
-// //     });
-// // });
